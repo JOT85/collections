@@ -2,18 +2,18 @@
 //Made in a couple of computer science lessons, and a bit for fun too.
 package collections
 
-import "./list"
-import "./queue"
-import "./priorityQueue"
-import "./stack"
+import "github.com/jot85/collections/list"
+import "github.com/jot85/collections/queue"
+import "github.com/jot85/collections/priorityQueue"
+import "github.com/jot85/collections/stack"
 
-//List is list.List from ./list
+//List is list.List from github.com/jot85/collections/list
 type List list.List
-//ListItem is list.Item from ./list
+//ListItem is list.Item from github.com/jot85/collections/list
 type ListItem list.Item
-//Queue is queue.Queue from ./queue
+//Queue is queue.Queue from github.com/jot85/collections/queue
 type Queue queue.Queue
-//PriorityQueue is priorityQueue.PriorityQueue from ./priorityQueue
+//PriorityQueue is priorityQueue.PriorityQueue from github.com/jot85/collections/priorityQueue
 type PriorityQueue priorityQueue.PriorityQueue
-//Stack is stack.Stack from ./stack
+//Stack is stack.Stack from github.com/jot85/collections/stack
 type Stack stack.Stack
