@@ -1,8 +1,6 @@
 package list
 
-import (
-	"unsafe"
-)
+import "unsafe"
 
 //ExposedList is a struct that exposes all internal struct fields of a List
 //You generally shouldn't use the exposed struct.
