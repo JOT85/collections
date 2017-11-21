@@ -32,24 +32,24 @@ type ipSlice struct {
 }
 
 func (slice *ipSlice) GetIndex(index uint64) unsafe.Pointer {
-	return slice.slice[int(index)]
+	return (*slice.slice)[int(index)]
 }
 
 func (slice *ipSlice) SetIndex(index uint64, value unsafe.Pointer) {
-	slice.slice[int(index)] = value
+	(*slice.slice)[int(index)] = value
 }
 
 func (slice *ipSlice) Length() uint64 {
-	return uint64(len(slice.slice))
+	return uint64(len(*slice.slice))
 }
 
-func NewIndexablePointers(storage *interface{}) IndexableSetablePointers {
+func NewIndexablePointers(storage interface{}) IndexableSetablePointers {
 	switch t := (storage).(type) {
-		case list.List:
+		case *list.List:
 			return ipList{t}
-		case []unsafe.Pointer:
+		case *[]unsafe.Pointer:
 			return ipSlice{t}
 		default:
-			panic("Not valid storage container (must be list.List or []unsafe.Pointer)")
+			panic("Not valid storage container (must be pointer to list.List or []unsafe.Pointer)")
 	}
 }
