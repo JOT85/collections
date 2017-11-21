@@ -8,7 +8,11 @@ type List struct {
 	length uint64
 }
 
-//NewList returns a new, empty List.
-func NewList() List {
-	return List{}
+//NewList returns a new list with length empty items.
+func NewList(length uint64) (l *List) {
+	for length > 0 {
+		l.PushPointer(nil)
+		length--
+	}
+	return
 }
