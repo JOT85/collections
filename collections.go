@@ -46,9 +46,9 @@ func (slice *ipSlice) Length() uint64 {
 func NewIndexablePointers(storage interface{}) IndexableSetablePointers {
 	switch t := (storage).(type) {
 		case *list.List:
-			return ipList{t}
+			return IndexableSetablePointers(&ipList{t})
 		case *[]unsafe.Pointer:
-			return ipSlice{t}
+			return IndexableSetablePointers(&ipSlice{t})
 		default:
 			panic("Not valid storage container (must be pointer to list.List or []unsafe.Pointer)")
 	}
