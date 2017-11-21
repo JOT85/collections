@@ -7,8 +7,8 @@ import "unsafe"
 type HashFunction func (unsafe.Pointer, uint64, uint64) uint64
 
 type HashTable struct {
-	container *collections.IndexableSetablePointers
-	map map
+	container collections.IndexableSetablePointers
+	cmap containermap
 	HashFunction HashFunction
 }
 
@@ -17,38 +17,41 @@ type item struct {
 	stored bool
 }
 
-type map interface{
-	get func(uint64) bool
-	set func(uint64, bool)
+type containermap interface {
+	Get(uint64) bool
+	Set(uint64, bool)
 }
 
-type slicemap []byte
+type slicemap []bool
 
-func (m *slicemap) get(i uint64) bool {
-	return m[int(i)]
+func (m *slicemap) Get(i uint64) bool {
+	return (*m)[int(i)]
 }
 
-func (m *slicemap) set(i uint64, v bool) {
-	slicemap[int(i)] = v
+func (m *slicemap) Set(i uint64, v bool) {
+	(*m)[int(i)] = v
 }
 
-type listmap list.List
-
-func (l *listmap) get(i uint64) bool {
-	return *(*bool)(l.GetIndex(i).ValuePonter())
+type listmap struct {
+	list *list.List
 }
 
-func (l *listmap) set(i uint64, v bool) {
-	l.GetIndex(i).SetPointer(unsafe.Pointer(&bool))
+func (l *listmap) Get(i uint64) bool {
+	return *(*bool)(l.list.GetIndex(i).ValuePointer())
 }
 
-func NewHashTable(container collections.IndexablePointers, hashFunc HashFunction)) HashTable {
-	var m map
+func (l *listmap) Set(i uint64, v bool) {
+	l.list.GetIndex(i).SetPointer(unsafe.Pointer(&v))
+}
+
+func NewHashTable(container collections.IndexableSetablePointers, hashFunc HashFunction) HashTable {
+	var m containermap
 	l := container.Length()
-	if l > int((^uint(0)) >> 1) {
-		m = map(listmap(list.NewList(len)))
+	if l > uint64((^uint(0)) >> 1) {
+		m = containermap(&listmap{list.NewList(l)})
 	} else {
-		m = map(slicemap(make([]bool, l)))
+		temp := slicemap(make([]bool, l))
+		m = containermap(&temp)
 	}
 	return HashTable{
 		container,
@@ -62,8 +65,8 @@ func (table *HashTable) AddPointer(value unsafe.Pointer) {
 	var attempt uint64
 	for {
 		pos = table.HashFunction(value, attempt, pos)
-		if !table.map.get(pos) {
-			table.map.set(pos, true)
+		if !table.cmap.Get(pos) {
+			table.cmap.Set(pos, true)
 			table.container.SetIndex(pos, value)
 			break
 		}
