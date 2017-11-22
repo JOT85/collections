@@ -1,23 +1,35 @@
 package list
 
-import "unsafe"
+import (
+	"unsafe"
+
+	"github.com/jot85/collections"
+)
 
 //ExposedList is a struct that exposes all internal struct fields of a List
 //You generally shouldn't use the exposed struct.
 type ExposedList struct {
-	Start  **Item
-	End    **Item
-	Length *uint64
-	List   *List
+	Start            **Item
+	End              **Item
+	Length           *uint64
+	Setter           *collections.SetFunction
+	AllowUnsafe      *bool
+	LastIndexedIndex *uint64
+	LastIndexedItem  **Item
+	List             *List
 }
 
 //Expose creates an ExposedList from the List.
 func (l *List) Expose() ExposedList {
 	return ExposedList{
-		Start:  &l.start,
-		End:    &l.end,
-		Length: &l.length,
-		List:   l,
+		Start:            &l.start,
+		End:              &l.end,
+		Length:           &l.length,
+		Setter:           &l.setter,
+		AllowUnsafe:      &l.allowUnsafe,
+		LastIndexedIndex: &l.lastIndexedIndex,
+		LastIndexedItem:  &l.lastIndexedItem,
+		List:             l,
 	}
 }
 

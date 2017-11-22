@@ -2,33 +2,28 @@
 //Made in a couple of computer science lessons, and a bit for fun too.
 package collections
 
-import "github.com/jot85/collections/list"
 import "unsafe"
 
+//SetFunction represents a function that should be called with a value before it is inserted into a collection.
+//It should return an unsafe.Pointer to be stored.
+type SetFunction func(interface{}) unsafe.Pointer
+
+//IndexableSetablePointers is an interface something that allows indexing, has a length, and the values in the indexes can be retrieved or set.
+//So slices, lists etc. can all be wrapped to fit this interface.
+//One example of it's use is for containers in the "github.com/jot85/collections/hashtables" package.
 type IndexableSetablePointers interface {
 	GetIndex(uint64) unsafe.Pointer
 	SetIndex(uint64, unsafe.Pointer)
 	Length() uint64
 }
 
-type ipList struct {
-	list *list.List
-}
-
-func (list *ipList) GetIndex(index uint64) unsafe.Pointer {
-	return list.list.GetIndex(index).ValuePointer()
-}
-
-func (list *ipList) SetIndex(index uint64, value unsafe.Pointer) {
-	list.list.GetIndex(index).SetPointer(value)
-}
-
-func (list *ipList) Length() uint64 {
-	return list.list.Length()
-}
-
 type ipSlice struct {
-	slice* []unsafe.Pointer
+	slice *[]unsafe.Pointer
+}
+
+//SliceToIndexableSetablePointers wraps a slice of unsafe.Pointers in a IndexableSetablePointers interface
+func SliceToIndexableSetablePointers(slice *[]unsafe.Pointer) IndexableSetablePointers {
+	return IndexableSetablePointers(&ipSlice{slice})
 }
 
 func (slice *ipSlice) GetIndex(index uint64) unsafe.Pointer {
@@ -41,15 +36,4 @@ func (slice *ipSlice) SetIndex(index uint64, value unsafe.Pointer) {
 
 func (slice *ipSlice) Length() uint64 {
 	return uint64(len(*slice.slice))
-}
-
-func NewIndexablePointers(storage interface{}) IndexableSetablePointers {
-	switch t := (storage).(type) {
-		case *list.List:
-			return IndexableSetablePointers(&ipList{t})
-		case *[]unsafe.Pointer:
-			return IndexableSetablePointers(&ipSlice{t})
-		default:
-			panic("Not valid storage container (must be pointer to list.List or []unsafe.Pointer)")
-	}
 }

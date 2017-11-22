@@ -5,21 +5,35 @@ func (l *List) GetIndex(i uint64) *Item {
 	if i >= l.length {
 		panic(ErrIndexOutOfRange)
 	}
-	if i < l.length/2 {
-		//Start from the begining if we're in the first half of the list
-		item := l.start
-		for ; i > 0 && item != nil; i-- {
-			item = item.after
+	//Return if it is the start or the end
+	if i == 0 {
+		return l.start
+	}
+	if i == l.length-1 {
+		return l.end
+	}
+	//Or if it was the last thing we indexed
+	if i == l.lastIndexedIndex {
+		if l.lastIndexedItem != nil {
+			return l.lastIndexedItem
 		}
-		return item
 	}
-	//Start from the end if we're in the second half of the list
-	item := l.end
-	i = l.length - 1 - i
-	for ; i > 0 && item != nil; i-- {
-		item = item.before
+	//If we're between the last indexed and the end
+	if i > l.lastIndexedIndex {
+		distFromLastIndexed := i - l.lastIndexedIndex
+		distFromEnd := l.length - 1 - i
+		//Go the shortest way
+		if distFromLastIndexed > distFromEnd {
+			return l.end.Backward(distFromEnd)
+		}
+		return l.lastIndexedItem.Forward(distFromLastIndexed)
 	}
-	return item
+	distFromLastIndexed := l.lastIndexedIndex - i
+	//Go the shortest way
+	if distFromLastIndexed > i {
+		return l.start.Forward(i)
+	}
+	return l.lastIndexedItem.Backward(distFromLastIndexed)
 }
 
 //Previous returns the previous item in the List or nil if there isn't one.
@@ -33,7 +47,7 @@ func (i *Item) Next() *Item {
 }
 
 //Forward returns the Item n Items forward in the list, or nil if you leave the list.
-func (i *Item) Forward(n uint) *Item {
+func (i *Item) Forward(n uint64) *Item {
 	for ; n > 0 && i != nil; n-- {
 		i = i.after
 	}
@@ -41,7 +55,7 @@ func (i *Item) Forward(n uint) *Item {
 }
 
 //Backward returns the Item n Items backwards in the list or nil if you leave the list.
-func (i *Item) Backward(n uint) *Item {
+func (i *Item) Backward(n uint64) *Item {
 	for ; n > 0 && i != nil; n-- {
 		i = i.before
 	}

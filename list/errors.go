@@ -13,3 +13,6 @@ var ErrNotInList = errors.New("Item not in list")
 
 //ErrIndexOutOfRange is thrown when something is attempted to be carries out on an index that doesn't exist.
 var ErrIndexOutOfRange = errors.New("index out of range")
+
+//ErrUnsafe is thrown when an unsafe operation is performed, and allowUnsafe is false
+var ErrUnsafe = errors.New("index out of range")

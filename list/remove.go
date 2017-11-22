@@ -9,18 +9,25 @@ func (l *List) remove(i *Item) {
 		//If this is the only item, only set the start and end of the list to nil
 		l.end = nil
 		l.start = nil
+		l.lastIndexedItem = nil
 	} else if last {
 		//If we are only the last item, set the end of the list to the Item before this, set the Item after the new end to nil, and set the Item before this to nil
+		l.lastIndexedIndex--
+		l.lastIndexedItem = i.before
 		l.end = i.before
 		i.before.after = nil
 		i.before = nil
 	} else if first {
 		//If we are only the first item, set the start of the list to the Item after this, set the Item before the new start to nil, and set the Item after this to nil
+		l.lastIndexedIndex++
+		l.lastIndexedItem = i.after
 		l.start = i.after
 		i.after.before = nil
 		i.after = nil
 	} else {
 		//If we are in the middle of the list, set the Item after the Item before this to the current Item after this, the Item before the Item after this to the current Item before this, and remove links from this Item
+		l.lastIndexedIndex--
+		l.lastIndexedItem = i.before
 		i.before.after = i.after
 		i.after.before = i.before
 		i.before = nil

@@ -20,6 +20,13 @@ func (l *List) isLastItem(i *Item) bool {
 	panic(ErrNotInList)
 }
 
+//PanicIfUnsafeNotAllowed panics with ErrUnsafe if unsafe operations are not allowed on the List.
+func (l *List) PanicIfUnsafeNotAllowed() {
+	if !l.allowUnsafe {
+		panic(ErrUnsafe)
+	}
+}
+
 //PanicIfEmpty panics with ErrNoItems if the List is empty or incomplete.
 func (l *List) PanicIfEmpty() {
 	//Check this List has some Items

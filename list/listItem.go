@@ -27,6 +27,11 @@ func (i *Item) Copy() Item {
 	}
 }
 
+//CopyTo clones the source Item to the given Item.
+func (i *Item) CopyTo(item *Item) {
+	item.value = i.value
+}
+
 //ValuePointer returns the unsafe.Pointer to the value of this item.
 func (i *Item) ValuePointer() unsafe.Pointer {
 	return i.value
@@ -37,12 +42,23 @@ func (i *Item) Value() interface{} {
 	return *(*interface{})(i.value)
 }
 
+//PointerValueOf (item) is the same as item.ValuePointer()
+func (l *List) PointerValueOf(item *Item) unsafe.Pointer {
+	return item.value
+}
+
+//ValueOf (item) is the same as item.Value()
+func (l *List) ValueOf(item *Item) interface{} {
+	return item.Value()
+}
+
 //SetPointer sets the value of the ListItem to the value in the given unsafe.Pointer.
-func (i *Item) SetPointer(value unsafe.Pointer) {
+func (l *List) SetPointer(i *Item, value unsafe.Pointer) {
+	l.PanicIfUnsafeNotAllowed()
 	i.value = value
 }
 
 //Set wraps SetPointer by calling SetPointer with the pointer to the given value.
-func (i *Item) Set(value interface{}) {
-	i.value = unsafe.Pointer(&value)
+func (l *List) Set(i *Item, value interface{}) {
+	i.value = l.valueToPointer(value)
 }
