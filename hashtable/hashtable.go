@@ -3,6 +3,9 @@ package hashtable
 import "github.com/jot85/collections"
 import "github.com/jot85/collections/list"
 import "unsafe"
+import "errors"
+
+var ErrFull = errors.New("HashTable container full")
 
 //HashFunction represents a function that can be used as a hash function for a hash table.
 //The first argument is a pointer to the data it should hash.
@@ -18,6 +21,7 @@ type HashTable struct {
 	HashFunction HashFunction
 	allowUnsafe  bool
 	setter       collections.SetFunction
+	getter       collections.GetFunction
 }
 
 type item struct {
@@ -26,7 +30,7 @@ type item struct {
 }
 
 //NewHashTable creates a new HashTable using the given collections.IndexableSetablePointers to store the data in, and the given HashFunction to generate the hashes.
-func NewHashTable(container collections.IndexableSetablePointers, hashFunc HashFunction, setter collections.SetFunction, allowUnsafe bool) HashTable {
+func NewHashTable(container collections.IndexableSetablePointers, hashFunc HashFunction, setter collections.SetFunction, getter collections.GetFunction, allowUnsafe bool) HashTable {
 	var m containermap
 	l := container.Length()
 	if l > uint64((^uint(0))>>1) {
@@ -41,6 +45,7 @@ func NewHashTable(container collections.IndexableSetablePointers, hashFunc HashF
 		hashFunc,
 		allowUnsafe,
 		setter,
+		getter,
 	}
 }
 
@@ -55,14 +60,19 @@ func (table *HashTable) valueToPointer(value interface{}) unsafe.Pointer {
 func (table *HashTable) addPointer(value unsafe.Pointer) {
 	var pos uint64
 	var attempt uint64
+	pos = table.HashFunction(value, attempt, pos)
+	origPos := pos
 	for {
-		pos = table.HashFunction(value, attempt, pos)
 		if !table.cmap.Get(pos) {
 			table.cmap.Set(pos, true)
 			table.container.SetIndex(pos, value)
 			break
 		}
 		attempt++
+		pos = table.HashFunction(value, attempt, pos)
+		if pos == origPos {
+			panic(ErrFull)
+		}
 	}
 }
 
@@ -74,4 +84,30 @@ func (table *HashTable) AddPointer(value unsafe.Pointer) {
 //Add adds the value to the HashTable
 func (table *HashTable) Add(value interface{}) {
 	table.addPointer(table.valueToPointer(value))
+}
+
+func (table *HashTable) Search(value interface{}) bool {
+	var pos uint64
+	var attempt uint64
+	pVal := table.valueToPointer(value)
+	pos = table.HashFunction(pVal, attempt, pos)
+	origPos := pos
+	for {
+		if !table.cmap.Get(pos) {
+			return false
+		}
+		val := table.getter(table.container.GetIndex(pos))
+		if value == val {
+			return true
+		}
+		attempt++
+		pos = table.HashFunction(pVal, attempt, pos)
+		if pos == origPos {
+			return false
+		}
+	}
+}
+
+func (table *HashTable) SearchPointer(value unsafe.Pointer) bool {
+	return table.Search(table.setter(value))
 }

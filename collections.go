@@ -8,6 +8,8 @@ import "unsafe"
 //It should return an unsafe.Pointer to be stored.
 type SetFunction func(interface{}) unsafe.Pointer
 
+type GetFunction func(unsafe.Pointer) interface{}
+
 //IndexableSetablePointers is an interface something that allows indexing, has a length, and the values in the indexes can be retrieved or set.
 //So slices, lists etc. can all be wrapped to fit this interface.
 //One example of it's use is for containers in the "github.com/jot85/collections/hashtables" package.

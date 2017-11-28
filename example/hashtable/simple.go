@@ -9,17 +9,26 @@ func doHash(data unsafe.Pointer, attempt, last uint64) uint64 {
 	if attempt > 0 {
 		return (last + 1) % 10
 	}
-	fmt.Println(uintptr(data))
-	fmt.Println(*(*uintptr)(data))
-	fmt.Println(*(*[64]byte)(data))
-	fmt.Println(*(*[5]byte)(
+	//fmt.Println(uintptr(data))
+	//fmt.Println(*(*uintptr)(data))
+	//fmt.Println(*(*[64]byte)(data))
+	/*fmt.Println(*(*[5]byte)(
 		unsafe.Pointer(
 			*(*uintptr)(data),
 		),
-	))
+	))*/
 	//fmt.Println(*(*[]byte)(data))
 	n := *(*uint64)(data)
 	return n % 10
+}
+
+func yaySet(val interface{}) unsafe.Pointer {
+	temp := val.(uint64)
+	return unsafe.Pointer(&temp)
+}
+
+func yayGet(val unsafe.Pointer) interface{} {
+	return *(*uint64)(val)
 }
 
 func printContainer(container []unsafe.Pointer) {
@@ -40,20 +49,22 @@ func main() {
 	fmt.Println([]byte("Yo!!!"))
 	container := make([]unsafe.Pointer, 10)
 	containerInterface := collections.SliceToIndexableSetablePointers(&container)
-	t := hashtable.NewHashTable(containerInterface, doHash, nil, true)
+	t := hashtable.NewHashTable(containerInterface, doHash, yaySet, yayGet, true)
 	printContainer(container)
-	/*addit := func(v uint64) {
-		t.AddPointer(unsafe.Pointer(&v))
-	}*/
-	//addit(5)
-	//addit(7)
-	//addit(18)
+	t.Add(uint64(5))
+	t.Add(uint64(7))
+	t.Add(uint64(18))
+	t.Add(uint64(107))
+	t.Add(uint64(2148))
 	printContainer(container)
-	//addit(107)
+	//temp := "Hi?"
+	//temp2 := "Yo!!!"
+	//t.AddPointer(unsafe.Pointer(&temp))
+	//t.AddPointer(unsafe.Pointer(&temp2))
 	printContainer(container)
-	temp := "Hi?"
-	temp2 := "Yo!!!"
-	t.AddPointer(unsafe.Pointer(&temp))
-	t.AddPointer(unsafe.Pointer(&temp2))
-	printContainer(container)
+	fmt.Println(t.Search(uint64(5)))
+	fmt.Println(t.Search(uint64(7)))
+	fmt.Println(t.Search(uint64(3)))
+	fmt.Println(t.Search(uint64(8)))
+	fmt.Println(t.Search(uint64(2148)))
 }
